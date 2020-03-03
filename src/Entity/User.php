@@ -6,12 +6,18 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @ApiResource()
+ * @UniqueEntity(
+ *     fields="email",
+ *     message="Un compte est déjà inscrit avec cet email !"
+ * )
  */
 class User implements UserInterface
 {
@@ -26,6 +32,8 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"customers_read", "invoices_read", "invoices_subresource"})
+     * @Assert\NotBlank(message="L'email doit être renseigné")
+     * @Assert\Email(message="L'adresse email doit avoir un format valide")
      */
     private $email;
 
@@ -37,18 +45,23 @@ class User implements UserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Assert\NotBlank(message="Le mot de passe est obligatoire")
      */
     private $password;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customers_read", "invoices_read", "invoices_subresource"})
+     * @Assert\NotBlank(message="Le prénom du customer est obligatoire")
+     * @Assert\Length(min=3, minMessage="Le prénom doit faire au moins 3 caractères", max=255, maxMessage="Le prénom doit faire moins de 255 caractères")
      */
     private $firstName;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"customers_read", "invoices_read", "invoices_subresource"})
+     * @Assert\NotBlank(message="Le nom du customer est obligatoire")
+     * @Assert\Length(min=3, minMessage="Le nom doit faire au moins 3 caractères", max=255, maxMessage="Le prénom doit faire moins de 255 caractères")
      */
     private $lastName;
 
