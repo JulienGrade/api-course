@@ -1,20 +1,30 @@
 import React, {useEffect, useState} from 'react';
-import axios from "axios";
+import Pagination from "../components/Pagination";
+import CustomersAPI from "../services/customersAPI";
 
 const CustomersPage = (props) => {
 
     const [customers, setCustomers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [search, setSearch] = useState("");
 
+    // Permet de récupérer les customers
+    const fetchCustomers = async () => {
+        try {
+            const data = await CustomersAPI.findAll()
+            setCustomers(data);
+        } catch (error) {
+            console.log(error.response);
+        }
+    }
+
+    // Au chargement du composant on va chercher les customers
     useEffect(() => {
-        axios
-            .get("http://127.0.0.1:8000/api/clients")
-            .then(response => response.data['hydra:member'])
-            .then(data => setCustomers(data))
-            .catch(error=> console.log(error.response));
+        fetchCustomers();
     }, []);
 
-    const handleDelete = (id) => {
+    // Gestion de la suppression d'un customer
+    const handleDelete = async (id) => {
        console.log(id);
 
        // Ici on enregistre les customers avant la requete,ensuite on efface et si il y
@@ -23,9 +33,14 @@ const CustomersPage = (props) => {
        // L'approche optimiste
         setCustomers(customers.filter(customer => customer.id !== id));
 
-       // L'approche pessimiste
-       axios
-           .delete("http://127.0.0.1:8000/api/customers/" + id)
+        // Facon utilisant async et await
+        try {
+            await CustomersAPI.delete(id)
+        } catch (error) {
+            setCustomers(originalCustomers);
+        }
+       // Facon moins optimisée de faire une requete
+        CustomersAPI.delete(id)
            .then(response => console.log("ok"))
            .catch(error => {
                setCustomers(originalCustomers);
@@ -33,26 +48,42 @@ const CustomersPage = (props) => {
            });
     };
 
-    const handlePageChange = page => {
-        setCurrentPage(page);
+    // Gestion du changement de page
+    const handlePageChange = page => setCurrentPage(page);
+
+    // Gestion de la recherche
+    const handleSearch = ({currentTarget}) => {
+        setSearch(currentTarget.value);
+        setCurrentPage(1);
     };
 
+    // Nombre d'items par page
     const itemsPerPage = 10;
-    const pagesCount = Math.ceil(customers.length / itemsPerPage);
-    const pages = [];
 
-    for(let i =1; i <= pagesCount; i++) {
-        pages.push(i);
-    }
+    // Filtrage des customers en fonction de la recherche
+    const filteredCustomers = customers.filter(
+        c =>
+            c.firstName.toLowerCase().includes(search.toLowerCase()) ||
+            c.lastName.toLowerCase().includes(search.toLowerCase()) ||
+            c.email.toLowerCase().includes(search.toLowerCase()) ||
+            (c.company && c.company.toLowerCase().includes(search.toLowerCase()))
+    );
 
-    // D'ou on part (start) pendant combien (itemsPerPage)
-    const start = currentPage * itemsPerPage - itemsPerPage;
-    //                 3      *     10       -      10   =  20
-    const paginatedCustomers = customers.slice(start, start + itemsPerPage);
+    // Pagination des données
+    const paginatedCustomers = Pagination.getData(
+        filteredCustomers,
+        currentPage,
+        itemsPerPage
+    );
 
     return (
         <>
             <h1>Liste des clients</h1>
+
+            <div className="form-group">
+                <input type="text" onChange={handleSearch} value={search} className="form-control" placeholder="Rechercher..."/>
+            </div>
+
             <table className="table table-hover">
                 <thead>
                     <tr>
@@ -90,31 +121,14 @@ const CustomersPage = (props) => {
 
                 </tbody>
             </table>
-            <div>
-                <ul className="pagination pagination-sm">
-                    <li className={"page-item" + (currentPage === 1 && " disabled")}>
-                        <button className="page-link" onClick={ () => handlePageChange(currentPage - 1)}>
-                            &laquo;
-                        </button>
-                    </li>
-                    {pages.map(page =>
-                        <li key={page}
-                            className={"page-item" + (currentPage === page && " active")}>
-                            <button
-                                className="page-link"
-                                onClick={ () => handlePageChange(page)}>
-                                {page}
-                            </button>
-                        </li>
-                    )}
 
-                    <li className={"page-item" + (currentPage === pagesCount && " disabled")}>
-                        <button className="page-link" onClick={ () => handlePageChange(currentPage + 1)}>
-                            &raquo;
-                        </button>
-                    </li>
-                </ul>
-            </div>
+            {itemsPerPage < filteredCustomers.length && (
+                <Pagination currentPage={currentPage}
+                        itemsPerPage={itemsPerPage}
+                        length={filteredCustomers.length}
+                        onPageChanged={handlePageChange}
+                />
+            )}
         </>
     );
 };

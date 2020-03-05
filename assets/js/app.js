@@ -16,6 +16,7 @@ import { HashRouter, Switch, Route } from "react-router-dom";
 // any CSS you import will output into a single css file (app.css in this case)
 import '../css/app.css';
 import CustomersPage from "./pages/CustomersPage";
+import CustomersPageWithPagination from "./pages/CustomersPageWithPagination";
 
 
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
