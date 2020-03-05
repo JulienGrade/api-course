@@ -7,6 +7,8 @@ const CustomersPage = (props) => {
     const [customers, setCustomers] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [search, setSearch] = useState("");
+    // Nombre d'items par page
+    const itemsPerPage = 10;
 
     // Permet de récupérer les customers
     const fetchCustomers = async () => {
@@ -16,7 +18,7 @@ const CustomersPage = (props) => {
         } catch (error) {
             console.log(error.response);
         }
-    }
+    };
 
     // Au chargement du composant on va chercher les customers
     useEffect(() => {
@@ -57,9 +59,6 @@ const CustomersPage = (props) => {
         setCurrentPage(1);
     };
 
-    // Nombre d'items par page
-    const itemsPerPage = 10;
-
     // Filtrage des customers en fonction de la recherche
     const filteredCustomers = customers.filter(
         c =>
@@ -81,7 +80,11 @@ const CustomersPage = (props) => {
             <h1>Liste des clients</h1>
 
             <div className="form-group">
-                <input type="text" onChange={handleSearch} value={search} className="form-control" placeholder="Rechercher..."/>
+                <input type="text"
+                       onChange={handleSearch}
+                       value={search}
+                       className="form-control"
+                       placeholder="Rechercher..."/>
             </div>
 
             <table className="table table-hover">
