@@ -7,38 +7,56 @@
 
 // Les imports importants
 
-import React from 'react';
+import React, {useState} from 'react';
 import ReactDOM from "react-dom";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
-import { HashRouter, Switch, Route } from "react-router-dom";
+import { HashRouter, Switch, Route, withRouter} from "react-router-dom";
 
 // any CSS you import will output into a single css file (app.css in this case)
 import '../css/app.css';
 import CustomersPage from "./pages/CustomersPage";
 import CustomersPageWithPagination from "./pages/CustomersPageWithPagination";
 import InvoicesPage from "./pages/InvoicesPage";
+import LoginPage from "./pages/LoginPage";
+import AuthAPI from "./services/authAPI";
+import AuthContext from "./contexts/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
 
+require("../css/app.css");
 
 // Need jQuery? Install it with "yarn add jquery", then uncomment to import it.
 // import $ from 'jquery';
 
-console.log('Hello Julien, tu peux me modifier sur assets/js/app.js');
-
-
+AuthAPI.setup();
 
 const App = () => {
+
+    const [isAuthenticated, setIsAuthenticated] = useState(AuthAPI.isAuthenticated);
+
+    // Ici on utilise withRouter afin de rendre la navbar router comme ce qui est dans le switch
+    // et avoir les propriétes d'une route type history. Ainsi on peut faire de la redirection dans la navbar
+    const NavbarWithRouter = withRouter(Navbar);
+
     return (
-        <HashRouter>
-            <Navbar />
-            <main className="container pt-5">
-                <Switch>
-                    <Route path="/customers" component={CustomersPage}/>
-                    <Route path="/invoices" component={InvoicesPage} />
-                    <Route path="/" component={HomePage}/>
-                </Switch>
-            </main>
-        </HashRouter>
+        <AuthContext.Provider value={{
+            isAuthenticated,
+            setIsAuthenticated
+        }} >
+            <HashRouter>
+                <NavbarWithRouter />
+                <main className="container pt-5">
+                    <Switch>
+                        <Route path="/login" component={LoginPage}/>
+
+                        <PrivateRoute path="/customers" component={CustomersPage}/>
+                        <PrivateRoute path="/invoices" component={InvoicesPage}/>
+                        <Route path="/" component={HomePage}/>
+                    </Switch>
+                </main>
+            </HashRouter>
+        </AuthContext.Provider>
+
     );
 };
 
