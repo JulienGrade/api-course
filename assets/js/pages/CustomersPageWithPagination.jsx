@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import Pagination from "../components/Pagination";
+import {toast} from "react-toastify";
 
 const CustomersPageWithPagination = (props) => {
 
@@ -18,11 +19,11 @@ const CustomersPageWithPagination = (props) => {
                 setTotalItems(response.data['hydra:totalItems']);
                 setLoading(false);
             })
-            .catch(error=> console.log(error.response));
+            .catch(error=> toast.error("Erreur lors du chargement des clients !"));
     }, [currentPage]);
 
     const handleDelete = (id) => {
-        console.log(id);
+
 
         // Ici on enregistre les customers avant la requete,ensuite on efface et si il y
         // avait une erreur on ré affecte cette valeur a customers
@@ -36,7 +37,7 @@ const CustomersPageWithPagination = (props) => {
             .then(response => console.log("ok"))
             .catch(error => {
                 setCustomers(originalCustomers);
-                console.log(error.response);
+                toast.error("Erreur lors de la suppression !");
             });
     };
 
