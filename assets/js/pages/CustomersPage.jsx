@@ -31,29 +31,17 @@ const CustomersPage = (props) => {
     }, []);
 
     // Gestion de la suppression d'un customer
-    const handleDelete = async (id) => {
-
-       // Ici on enregistre les customers avant la requete,ensuite on efface et si il y
-        // avait une erreur on ré affecte cette valeur a customers
-       const originalCustomers = [...customers];
-       // L'approche optimiste
+    const handleDelete = async id => {
+        const originalCustomers = [...customers];
         setCustomers(customers.filter(customer => customer.id !== id));
 
-        // Facon utilisant async et await
         try {
             await CustomersAPI.delete(id);
             toast.success("Le client a bien été supprimé");
         } catch (error) {
             setCustomers(originalCustomers);
-            toast.error("La suppression du client n'a pas pu être réalisée !")
+            toast.error("La suppression du client n'a pas pu fonctionner");
         }
-       // Facon moins optimisée de faire une requete
-        /*CustomersAPI.delete(id)
-           .then(response => console.log("ok"))
-           .catch(error => {
-               setCustomers(originalCustomers);
-               console.log(error.response);
-           });*/
     };
 
     // Gestion du changement de page
