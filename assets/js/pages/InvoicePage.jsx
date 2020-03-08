@@ -38,8 +38,8 @@ const InvoicePage = ({history, match}) => {
 
             if(!invoice.customer && !id) setInvoice({...invoice, customer: data[0].id });
         } catch (error) {
-            history.replace("/invoices");
             toast.error("Erreur lors du chargement des clients !");
+            history.replace("/invoices");
         }
     };
 

@@ -9,7 +9,7 @@ function set(key, data) {
 
 function get(key) {
     return new Promise((resolve) => {
-       resolve(cache[key] && cache[key].cachedAt + 15 * 60 * 1000 < new Date().getTime()
+       resolve(cache[key] && cache[key].cachedAt + 15 * 60 * 1000 > new Date().getTime()
            ? cache[key].data
            : null
        );
